@@ -8,7 +8,7 @@ from playwright.sync_api import Page, expect, sync_playwright
 
 load_dotenv()
 
-COOKIE_FILE = os.getenv("SESSIONID_COOKIE_FILE")
+COOKIE_FILE = "./.auth/aspnet_sessionid_cookie.json"
 
 
 # Define a function to handle pings on success and failure
