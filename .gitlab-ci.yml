@@ -1,0 +1,12 @@
+stages:
+  - test
+
+tests:
+  stage: test
+  tags:
+    - docker04
+  image: mcr.microsoft.com/playwright:v1.47.0-noble
+  script: pytest test_compass.py
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: always
