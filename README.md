@@ -4,7 +4,7 @@ This repository contains test files for scenarios unavailable in the Compass API
 Includes:
 
 - Offline CompassLink clients, from Compass' Client Manager page (https://yourschool.compass.education/Configure/ConnectedClients.aspx).
-- Any Import Jobs with a failed or error status (https://mckinnonsc-vic.compass.education/Configure/ImportJobs.aspx). Limited to the first page (25 results)
+- Any Import Jobs with a failed or error status (https://yourschool.compass.education/Configure/ImportJobs.aspx). Limited to the first page (first 25 results).
 
 ## Getting Started
 
