@@ -62,9 +62,7 @@ def playwright():
 @pytest.fixture(scope="session")
 def browser(playwright):
     """Set up a new browser instance."""
-    browser = playwright.firefox.launch(
-        headless=False
-    )  # You can use headless=True if you don't want the browser to be visible.
+    browser = playwright.firefox.launch()
     yield browser
     browser.close()
 
