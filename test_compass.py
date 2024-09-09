@@ -2,6 +2,7 @@ import json
 import os
 
 import pytest
+import requests
 from dotenv import load_dotenv
 from playwright.sync_api import Page, expect, sync_playwright
 
@@ -10,19 +11,18 @@ load_dotenv()
 COOKIE_FILE = os.getenv("SESSIONID_COOKIE_FILE")
 
 
-def post_request_authenticated(page):
-    """Perform a POST request using the authenticated session."""
-    response = page.request.post(
-        "https://mckinnonsc-vic.compass.education/Services/Configure.svc/GetAllClients",
-        headers={"Content-Type": "application/json"},
-    )
+# Define a function to handle pings on success and failure
+def post_healthcheck(uuid: str, success: bool):
+    """Post to healthcheck URL on success or failure."""
+    base_url = f"https://hc-ping.com/{uuid}"
+    url = base_url if success else f"{base_url}/fail"
 
-    if response.ok:
-        print("POST request was successful.")
-        print(f"Response status: {response.status}")
-        print(f"Response body: {response.text()}")
-    else:
-        print(f"POST request failed with status: {response.status}")
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        print(f"Posted to {url}: Status {response.status_code}")
+    except requests.exceptions.RequestException as e:
+        print(f"Failed to post to {url}: {e}")
 
 
 def save_aspnet_sessionid(context):
@@ -110,6 +110,7 @@ def test_logged_in_with_sessionid(page):
 
 def test_check_client_error_in_c_main(page: Page):
     """Test to check if any elements on the page contain the .client-error class and fail if found."""
+    uuid = "5f538b95-61fc-40a2-b70a-d36d57f431ba"  # Your UUID for healthchecks
 
     page.goto(
         "https://mckinnonsc-vic.compass.education/Configure/ConnectedClients.aspx"
@@ -117,9 +118,36 @@ def test_check_client_error_in_c_main(page: Page):
 
     page.get_by_text("Client Type: CompassLink").wait_for()
 
-    expect(
-        page.locator(".client-error"),
-        "Elements with class 'client-error' found, failing the test.",
-    ).not_to_be_visible()
+    try:
+        expect(
+            page.locator(".client-error"),
+            "Elements with class 'client-error' found, failing the test.",
+        ).not_to_be_visible()
+        post_healthcheck(uuid, success=True)
 
-    print("Test passed, no elements with class 'client-error' found.")
+    except AssertionError as e:
+        print(f"Test failed: {e}")
+        post_healthcheck(uuid, success=False)
+        raise
+
+
+def test_check_import_jobs_error(page: Page):
+    """Test to check if any elements on the page contain the text 'Error' or 'Warning'."""
+    uuid = "e8f85df4-0b8e-4b27-8d80-b778475db1ed"  # Your UUID for healthchecks
+
+    page.goto("https://mckinnonsc-vic.compass.education/Configure/ImportJobs.aspx")
+
+    page.locator("#gridview-1023-table").wait_for()
+
+    cell_data = page.locator(".x-grid-cell-inner").all_inner_texts()
+
+    try:
+        for text in cell_data:
+            assert "Error" not in text, f"Found 'Error' in: {text}"
+            assert "Warning" not in text, f"Found 'Warning' in: {text}"
+        post_healthcheck(uuid, success=True)
+
+    except AssertionError as e:
+        print(f"Test failed: {e}")
+        post_healthcheck(uuid, success=False)
+        raise
