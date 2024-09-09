@@ -110,7 +110,7 @@ def test_logged_in_with_sessionid(page):
 
 def test_check_client_error_in_c_main(page: Page):
     """Test to check if any elements on the page contain the .client-error class and fail if found."""
-    uuid = "5f538b95-61fc-40a2-b70a-d36d57f431ba"  # Your UUID for healthchecks
+    uuid = os.getenv("COMPASSLINK_UUID")
 
     page.goto(
         "https://mckinnonsc-vic.compass.education/Configure/ConnectedClients.aspx"
@@ -133,7 +133,7 @@ def test_check_client_error_in_c_main(page: Page):
 
 def test_check_import_jobs_error(page: Page):
     """Test to check if any elements on the page contain the text 'Error' or 'Warning'."""
-    uuid = "e8f85df4-0b8e-4b27-8d80-b778475db1ed"  # Your UUID for healthchecks
+    uuid = os.getenv("IMPORT_JOBS_UUID")
 
     page.goto("https://mckinnonsc-vic.compass.education/Configure/ImportJobs.aspx")
 
